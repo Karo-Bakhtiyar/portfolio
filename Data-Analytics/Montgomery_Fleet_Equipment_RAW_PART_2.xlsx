@@ -1,0 +1,56 @@
+# Car Sales Data Visualization – Process Log for part 1
+
+This project was completed as part of the IBM Data Analyst Professional Certificate (Hands-on Lab).  
+The dataset was already pre-cleaned and formatted.  
+The purpose was to practice and demonstrate **Excel data visualization skills** and create portfolio-ready work.  
+**All visualizations were created by me**, based on the provided dataset and lab instructions.
+
+> **Note:**  
+> This process log is a detailed, step-by-step record of how I approached, cleaned, and prepared the dataset.  
+> I created it not only to ensure accountability and transparency, but also so anyone could replicate my workflow or verify my results.  
+>   
+> By documenting each decision and action, I can clearly demonstrate my analytical thinking, technical skills, and attention to detail — key qualities for any data analyst.  
+>   
+> Beyond this specific project, maintaining thorough logs helps me track progress, confirm that no critical steps are missed, and continuously refine my approach for future projects.  
+> It also serves as a valuable reference and training tool, both for myself and for others collaborating on similar workflows.
+
+
+---
+
+## 1. Line Chart
+**Process Steps:**
+1. Imported dataset containing average retention % for various car manufacturers.
+2. Removed extra header rows for clarity.
+3. Created a line chart to visualize and compare retention % across Japanese manufacturers.
+
+---
+
+## 2. Bar Chart
+**Process Steps:**
+1. Imported dataset with average year resale value and average price for different car models.
+2. Removed extra header rows.
+3. Created a clustered bar chart to compare resale value and price side by side.
+
+---
+
+## 3. Area Chart
+**Process Steps:**
+1. Imported dataset containing sales, pricing, and resale value details.
+2. Selected relevant numeric columns for visualization.
+3. Created an area chart to visualize trends in unit sales and price across manufacturers.
+
+---
+
+## 4. Column Chart
+**Process Steps:**
+1. Imported dataset with performance metrics (Power Perf Factor, Horsepower) and sales data.
+2. Chose relevant fields to highlight performance differences between models.
+3. Created a column chart to compare Power Perf Factor with unit sales.
+
+---
+
+## 5. Car_sales (Master Dataset)
+**Process Steps:**
+1. Used this sheet as the **primary data source** for all visualizations.
+2. No cleaning or transformation was required — data was ready to use.
+3. Served as the central reference point for all chart creation.

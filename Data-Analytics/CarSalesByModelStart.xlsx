@@ -1,0 +1,49 @@
+# Car Sales Data Visualization – Process Log for Part 2
+
+This continuation builds on the visual work completed in Part 1 of the IBM Data Analyst Professional Certificate (Hands-on Lab).  
+The dataset remained pre-cleaned and ready for use.  
+The focus in Part 2 was to expand the portfolio with **advanced Excel visualizations**, including multi-dimensional and interactive charts.  
+**All visualizations were created by me**, using the same master dataset and guided lab instructions.
+
+> **Note:**  
+> This process log is a detailed, step-by-step record of how I approached, cleaned, and prepared the dataset.  
+> I created it not only to ensure accountability and transparency, but also so anyone could replicate my workflow or verify my results.  
+>   
+> By documenting each decision and action, I can clearly demonstrate my analytical thinking, technical skills, and attention to detail — key qualities for any data analyst.  
+>   
+> Beyond this specific project, maintaining thorough logs helps me track progress, confirm that no critical steps are missed, and continuously refine my approach for future projects.  
+> It also serves as a valuable reference and training tool, both for myself and for others collaborating on similar workflows.
+
+
+---
+
+## 6. Histogram Chart  
+**Process Steps:**  
+- Imported dataset containing horsepower values for various car models.  
+- Selected the horsepower column to analyze distribution.  
+- Created a histogram chart to visualize the number of price ranges across german models.  
+
+---
+
+## 7. Scatter Plot  
+**Process Steps:**  
+- Imported dataset with horsepower and price data.  
+- Selected horsepower (x-axis) and price (y-axis) to explore correlation.  
+- Created a scatter plot to identify patterns from Comparing Price with Year Resale Value of German Cars
+.  
+
+---
+
+## 8. Sunburst Chart  
+**Process Steps:**  
+- Imported hierarchical dataset with vehicle type and horsepower level.  
+- Structured data into parent-child relationships for sunburst visualization.  
+- Created a sunburst chart to show the unit sale distribution within the nissan vehicle types.  
+
+---
+
+## 9. Car_sales (Master Dataset)  
+**Process Steps:**  
+- Continued using this sheet as the **central data source** for all visualizations.  
+- No data cleaning required — all fields were pre-validated.  
+- Enabled consistent reference across all chart types.
