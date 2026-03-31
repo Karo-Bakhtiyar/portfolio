@@ -1,0 +1,213 @@
+# Data Schema Documentation - Balanced Tree Clothing Co.
+
+## Database Overview
+
+The Balanced Tree Clothing Co. database contains 4 interconnected tables that support comprehensive analysis of sales performance, product catalog management, and customer behavior tracking for a fashion e-commerce business.
+
+**Database Type**: PostgreSQL  
+**Schema Name**: `balanced_tree`  
+**Total Records**: 15,000+ transactions  
+
+## Table Relationships
+
+```
+product_hierarchy (Category → Segment → Style)
+       ↓
+product_details (Product catalog with pricing)
+       ↓
+product_prices (Product pricing data)
+       ↓
+sales (Transaction records)
+```
+
+## Table Schemas
+
+### 1. `balanced_tree.sales` Table
+**Purpose**: Core transaction data capturing all customer purchases
+
+| Column Name | Data Type | Description | Sample Values |
+|-------------|-----------|-------------|---------------|
+| `prod_id` | VARCHAR(6) | Product identifier | 'c4a632', 'e83aa3' |
+| `qty` | INTEGER | Quantity purchased | 1, 2, 3 |
+| `price` | INTEGER | Product price (in dollars) | 13, 32, 54 |
+| `discount` | INTEGER | Discount percentage applied | 0, 10, 15, 20 |
+| `member` | BOOLEAN | Member status (t/f) | true, false |
+| `txn_id` | VARCHAR(6) | Transaction identifier | '54f307', 'c44440' |
+| `start_txn_time` | TIMESTAMP | Transaction timestamp | '2021-01-01 00:00:00' |
+
+**Key Relationships**:
+- Foreign Key: `prod_id` references `product_details.product_id`
+
+**Business Rules**:
+- Each transaction can contain multiple products
+- Member status affects pricing and promotions
+- Prices are stored in dollars (not cents as originally assumed)
+
+### 2. `balanced_tree.product_details` Table
+**Purpose**: Complete product catalog with names, categories, and denormalized hierarchy
+
+| Column Name | Data Type | Description | Sample Values |
+|-------------|-----------|-------------|---------------|
+| `product_id` | VARCHAR(6) | Unique product identifier | 'c4a632', 'e83aa3' |
+| `price` | INTEGER | Base product price in dollars | 13, 32, 54 |
+| `product_name` | VARCHAR(32) | Full product name | 'Navy Oversized Jeans - Womens' |
+| `category_id` | INTEGER | Category classification | 1, 2 |
+| `segment_id` | INTEGER | Segment classification | 3, 4, 5, 6 |
+| `style_id` | INTEGER | Style classification | 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18 |
+| `category_name` | VARCHAR(6) | Category name | 'Womens', 'Mens' |
+| `segment_name` | VARCHAR(6) | Segment name | 'Jeans', 'Jacket', 'Shirt', 'Socks' |
+| `style_name` | VARCHAR(19) | Style name | 'Navy Oversized', 'Black Straight' |
+
+**Key Relationships**:
+- Primary Key: `product_id`
+- Foreign Keys reference `product_hierarchy.id`:
+  - `category_id` → Category level (1, 2)
+  - `segment_id` → Segment level (3, 4, 5, 6)  
+  - `style_id` → Style level (7-18)
+
+**Product Catalog**:
+- **12 unique products** across 2 categories
+- **Womens**: 6 products (3 Jeans, 3 Jackets)
+- **Mens**: 6 products (3 Shirts, 3 Socks)
+
+### 3. `balanced_tree.product_hierarchy` Table
+**Purpose**: Hierarchical organization of product classifications
+
+| Column Name | Data Type | Description | Sample Values |
+|-------------|-----------|-------------|---------------|
+| `id` | INTEGER | Hierarchy level identifier | 1, 2, 3, 4, 5, 6, 7, 8, 9... |
+| `parent_id` | INTEGER | Parent level reference | NULL, 1, 2, 3, 4, 5, 6 |
+| `level_text` | VARCHAR(19) | Level description | 'Womens', 'Jeans', 'Navy Oversized' |
+| `level_name` | VARCHAR(8) | Level type | 'Category', 'Segment', 'Style' |
+
+**Hierarchy Structure**:
+```
+Categories (parent_id = NULL):
+├── 1: Womens
+│   ├── 3: Jeans
+│   │   ├── 7: Navy Oversized
+│   │   ├── 8: Black Straight  
+│   │   └── 9: Cream Relaxed
+│   └── 4: Jacket
+│       ├── 10: Khaki Suit
+│       ├── 11: Indigo Rain
+│       └── 12: Grey Fashion
+└── 2: Mens
+    ├── 5: Shirt
+    │   ├── 13: White Tee
+    │   ├── 14: Teal Button Up
+    │   └── 15: Blue Polo
+    └── 6: Socks
+        ├── 16: Navy Solid
+        ├── 17: White Striped
+        └── 18: Pink Fluro Polkadot
+```
+
+### 4. `balanced_tree.product_prices` Table
+**Purpose**: Product pricing reference data
+
+| Column Name | Data Type | Description | Sample Values |
+|-------------|-----------|-------------|---------------|
+| `id` | INTEGER | Price record identifier | 7, 8, 9, 10, 11, 12 |
+| `product_id` | VARCHAR(6) | Product reference | 'c4a632', 'e83aa3' |
+| `price` | INTEGER | Price in dollars | 13, 32, 10, 23, 19, 54 |
+
+**Key Relationships**:
+- Foreign Key: `product_id` references `product_details.product_id`
+
+**Pricing Summary**:
+- **Price Range**: $10 - $57
+- **Womens Products**: $10-$54 (Jeans: $10-$32, Jackets: $19-$54)
+- **Mens Products**: $10-$57 (Shirts: $10-$57, Socks: $17-$36)
+
+## Complete Product Catalog
+
+| Product ID | Product Name | Category | Segment | Style | Price |
+|------------|-------------|----------|---------|-------|-------|
+| c4a632 | Navy Oversized Jeans - Womens | Womens | Jeans | Navy Oversized | $13 |
+| e83aa3 | Black Straight Jeans - Womens | Womens | Jeans | Black Straight | $32 |
+| e31d39 | Cream Relaxed Jeans - Womens | Womens | Jeans | Cream Relaxed | $10 |
+| d5e9a6 | Khaki Suit Jacket - Womens | Womens | Jacket | Khaki Suit | $23 |
+| 72f5d4 | Indigo Rain Jacket - Womens | Womens | Jacket | Indigo Rain | $19 |
+| 9ec847 | Grey Fashion Jacket - Womens | Womens | Jacket | Grey Fashion | $54 |
+| 5d267b | White Tee Shirt - Mens | Mens | Shirt | White Tee | $40 |
+| c8d436 | Teal Button Up Shirt - Mens | Mens | Shirt | Teal Button Up | $10 |
+| 2a2353 | Blue Polo Shirt - Mens | Mens | Shirt | Blue Polo | $57 |
+| f084eb | Navy Solid Socks - Mens | Mens | Socks | Navy Solid | $36 |
+| b9a74d | White Striped Socks - Mens | Mens | Socks | White Striped | $17 |
+| 2feb6b | Pink Fluro Polkadot Socks - Mens | Mens | Socks | Pink Fluro Polkadot | $29 |
+
+## Data Quality Notes
+
+### Key Observations
+- **Monetary Values**: Stored as integers in dollars (not cents)
+- **Product IDs**: 6-character alphanumeric codes
+- **Transaction IDs**: 6-character alphanumeric codes
+- **Hierarchy**: 3-level structure (Category → Segment → Style)
+- **Product Coverage**: Equal distribution (6 Womens, 6 Mens products)
+
+### Data Relationships
+- `product_details` contains denormalized hierarchy data for query efficiency
+- `product_prices` mirrors the prices in `product_details` 
+- `sales` table references products but not hierarchy directly
+
+## Common Query Patterns
+
+### Revenue Analysis with Full Product Context
+```sql
+SELECT 
+    s.prod_id,
+    pd.product_name,
+    pd.category_name,
+    pd.segment_name,
+    pd.style_name,
+    s.qty,
+    s.price,
+    s.discount,
+    s.qty * s.price * (1 - s.discount/100.0) AS revenue
+FROM balanced_tree.sales s
+JOIN balanced_tree.product_details pd ON s.prod_id = pd.product_id
+```
+
+### Hierarchy Navigation
+```sql
+-- Get parent-child relationships
+SELECT 
+    parent.level_text AS parent_category,
+    child.level_text AS child_segment
+FROM balanced_tree.product_hierarchy parent
+JOIN balanced_tree.product_hierarchy child ON parent.id = child.parent_id
+WHERE parent.level_name = 'Category'
+  AND child.level_name = 'Segment'
+```
+
+### Category Performance Analysis
+```sql
+-- Compare Womens vs Mens performance
+SELECT 
+    pd.category_name,
+    COUNT(DISTINCT s.txn_id) as transactions,
+    SUM(s.qty) as total_quantity,
+    SUM(s.qty * s.price * (1 - s.discount/100.0)) as total_revenue
+FROM balanced_tree.sales s
+JOIN balanced_tree.product_details pd ON s.prod_id = pd.product_id
+GROUP BY pd.category_name
+```
+
+## Performance Considerations
+
+### Recommended Indexes
+- `sales(prod_id)` - Product lookups
+- `sales(member)` - Member analysis queries
+- `sales(start_txn_time)` - Time-based filtering
+- `product_details(category_id, segment_id)` - Hierarchy filtering
+
+### Denormalization Benefits
+- Product names and hierarchy readily available in `product_details`
+- Reduces joins for common queries
+- Trade-off: Some data redundancy for query performance
+
+---
+
+*Schema documentation based on Danny Ma's 8 Week SQL Challenge Case Study #7*  
+*Data source: [datawithdanny.com](https://datawithdanny.com)*

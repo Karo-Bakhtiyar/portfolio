@@ -1,0 +1,65 @@
+# Car Sales Data Visualization – Process Log for Part 3
+
+This section continues the visualization work from Parts 1 and 2 of the IBM Data Analyst Professional Certificate (Hands-on Lab).  
+The goal in Part 3 was to explore **diverse Excel chart types** and build a **dashboard** that communicates insights clearly to stakeholders.  
+**All visualizations were created by me**, using the same master dataset and guided lab instructions.
+
+> **Note:**  
+> This process log is a detailed, step-by-step record of how I approached, cleaned, and prepared the dataset.  
+> I created it not only to ensure accountability and transparency, but also so anyone could replicate my workflow or verify my results.  
+>   
+> By documenting each decision and action, I can clearly demonstrate my analytical thinking, technical skills, and attention to detail — key qualities for any data analyst.  
+>   
+> Beyond this specific project, maintaining thorough logs helps me track progress, confirm that no critical steps are missed, and continuously refine my approach for future projects.  
+> It also serves as a valuable reference and training tool, both for myself and for others collaborating on similar workflows.
+
+
+---
+
+## 10. Column Chart  
+**Process Steps:**  
+- Selected categorical data such as car brands or sales regions.  
+- Inserted a column chart to compare values vertically.  
+- Applied color formatting and axis labels for clarity.
+
+---
+
+## 11. Bar Chart  
+**Process Steps:**  
+- Used horizontal layout to display categories with longer labels (e.g., car models).  
+- Inserted a bar chart to visualize metrics like unit sales or resale value.  
+- Adjusted axis orientation and label formatting for readability.
+
+---
+
+## 12. Pie Chart  
+**Process Steps:**  
+- Chose proportional data such as vehicle type distribution.  
+- Created a pie chart to show share of total.  
+- Added data labels and legend for interpretability.
+
+---
+
+## 13. Sunburst Chart  
+**Process Steps:**  
+- Used hierarchical data (e.g., region → country → brand).  
+- Inserted a sunburst chart to visualize nested relationships.  
+- Customized segment colors and labels to enhance readability.
+
+---
+
+## 14. Dashboard  
+**Process Steps:**  
+- Integrated multiple charts (column, bar, pie, sunburst) into a single dashboard tab.  
+- Used slicers to enable dynamic filtering by category (e.g., brand, region, vehicle type).  
+- Applied cell linking and layout formatting for seamless interactivity.  
+- Designed the dashboard for stakeholder clarity and visual impact.
+
+---
+
+## 15. Car_sales (Master Dataset)  
+**Process Steps:**  
+- Continued using the validated master dataset.  
+- No additional cleaning required.  
+- Ensured consistency across all visualizations.
+

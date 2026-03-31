@@ -1,0 +1,499 @@
+---
+title: "Bellabeat Case Study Analysis"
+author: "Karo"
+date: "2025-07-24"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    number_sections: false
+    theme: flatly
+    highlight: tango
+    df_print: paged
+---
+
+# 🧠 Project Overview
+
+**Title:** Bellabeat Case Study – User Behavior Analysis  
+**Author:** Karo  
+**Date:** `r Sys.Date()`  
+**Tooling:** R, ggplot2, dplyr, tidyr  
+**Data Source:** Fitbit tracker data (public dataset)
+
+---
+
+## 🎯 Purpose
+
+To analyze user behavior in the Bellabeat app using Fitbit data, with the goal of uncovering patterns in activity, sleep, and weight tracking. These insights will inform Bellabeat’s marketing strategy by identifying which features drive engagement, how users differ in their habits, and what opportunities exist to improve retention and promote healthier behavior through targeted campaigns.
+
+---
+
+# 🧭 Objectives
+
+- Clean and prepare raw Fitbit datasets  
+- Explore relationships between steps, sleep, and weight tracking  
+- Identify user engagement levels and segment users accordingly  
+- Compare behavioral patterns across segments  
+- Translate findings into product-focused recommendations
+
+---
+
+# 🏢 Business Context
+
+Bellabeat is a wellness tech company offering smart devices and apps to help women monitor their health. Understanding how users engage with the app is essential for improving feature adoption, long-term retention, and personalized habit support.
+
+---
+
+# 📋 Notes
+
+- This analysis is structured across multiple stages, each documented with code, visuals, and insights  
+- All visualizations are generated using ggplot2 and follow a consistent color scheme for clarity  
+- Conclusions are written with both technical and stakeholder audiences in mind
+
+---
+
+# Let’s Begin!
+
+---
+
+# Data Cleaning Phase
+
+### Purpose
+Prepare the raw Fitbit datasets for analysis by cleaning missing values, formatting dates, and standardizing column names across all sources.
+
+### Note
+This step ensures that our analysis is built on reliable data. We remove duplicates, handle inconsistencies, and confirm data completeness — so every chart, metric, and insight that follows is trustworthy and reproducible.
+
+```{r data-cleaning, echo=TRUE, message=FALSE, warning=FALSE}
+# Load required packages
+library(readr)
+library(dplyr)
+library(lubridate)
+library(janitor)
+library(knitr)
+library(tibble)
+
+# Import raw datasets
+daily_activity <- read_csv("daily_activity_merged.csv")
+sleep_per_minute <- read_csv("minuteSleep_merged.csv")
+weight_tracking <- read_csv("weightLogInfo_merged.csv")
+
+# Clean daily activity data
+daily_activity_clean <- daily_activity %>%
+  distinct() %>%
+  mutate(ActivityDate = mdy(ActivityDate)) %>%
+  clean_names()
+
+# Clean sleep data
+sleep_per_minute_clean <- sleep_per_minute %>%
+  distinct() %>%
+  clean_names()
+
+# Clean weight tracking data
+weight_tracking_clean <- weight_tracking %>%
+  distinct() %>%
+  clean_names()
+
+# Check for missing values in each dataset
+
+## Daily Activity
+kable(enframe(colSums(is.na(daily_activity_clean)),
+              name = "Column", value = "Missing Values"))
+
+## Sleep Per Minute
+kable(enframe(colSums(is.na(sleep_per_minute_clean)),
+              name = "Column", value = "Missing Values"))
+
+## Weight Tracking
+kable(enframe(colSums(is.na(weight_tracking_clean)),
+              name = "Column", value = "Missing Values"))
+
+# Save cleaned datasets
+write_csv(daily_activity_clean, "cleaned_daily_activity.csv")
+write_csv(sleep_per_minute_clean, "cleaned_sleep_per_minute.csv")
+write_csv(weight_tracking_clean, "cleaned_weight_tracking.csv")
+```
+
+### What We Achieved
+All three datasets are now cleaned, standardized, and ready for analysis. We’ve removed duplicates and confirmed minimal missing data, ensuring reliable metrics.
+
+### Conclusion
+This foundation allows Bellabeat’s user behavior analysis to proceed confidently. Clean data ensures our findings reflect real usage patterns and can be trusted for strategic decisions.
+
+---
+
+# 📊 Analysis Phase 1: Steps and Calories
+
+### Purpose
+Analyze the relationship between users’ daily steps and calories burned to understand how physical activity impacts energy expenditure.
+
+```{r analysis-phase-steps-calories, echo=TRUE, message=FALSE, warning=FALSE}
+# Load required packages
+library(readr)
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+# Import cleaned dataset
+daily_activity_clean <- read_csv("cleaned_daily_activity.csv")
+
+# Calculate the Pearson correlation coefficient
+correlation <- cor(daily_activity_clean$total_steps, daily_activity_clean$calories, use = "complete.obs")
+
+# Print the result
+print(paste("Correlation between Total Steps and Calories Burned:", round(correlation, 3)))
+
+# Visualize the relationship
+ggplot(daily_activity_clean, aes(x = total_steps, y = calories)) +
+  geom_point(alpha = 0.5, color = "darkgreen") +
+  geom_smooth(method = "lm", se = FALSE, color = "blue") +
+  labs(
+    title = "Relationship Between Total Steps and Calories Burned",
+    x = "Total Steps",
+    y = "Calories Burned"
+  )
+```
+
+### Interpretation
+A correlation of around 0.58 suggests a moderate positive relationship:
+- As users take more steps, they tend to burn more calories.
+- Other factors like activity intensity and duration also play a role.
+
+#### So what?:
+"Bellabeat can bundle step challenges with nutrition insights in the app (e.g., 'Hit 10K steps to unlock hydration tips'). This incentivizes activity while promoting the Spring water bottle as a hydration companion."
+
+---
+
+# 📊 Analysis Phase 2: Steps and Sleep Duration
+
+### Purpose
+Analyze how daily steps relate to total sleep duration to uncover patterns between activity and rest.
+
+```{r analysis-phase-steps-sleep, echo=TRUE, message=FALSE, warning=FALSE}
+# Load required packages
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+# Prepare sleep data
+sleep_summary <- sleep_per_minute_clean %>%
+  mutate(sleep_day = as_date(mdy_hms(date))) %>%
+  group_by(id, sleep_day) %>%
+  summarise(total_minutes_asleep = sum(value == 1, na.rm = TRUE), .groups = "drop")
+
+# Prepare activity data
+activity_summary <- daily_activity_clean %>%
+  mutate(activity_date = as_date(activity_date))
+
+# Merge sleep and activity data
+sleep_activity <- inner_join(
+  sleep_summary,
+  activity_summary,
+  by = c("id" = "id", "sleep_day" = "activity_date")
+)
+
+# Calculate correlation
+correlation_sleep_steps <- cor(sleep_activity$total_steps, sleep_activity$total_minutes_asleep, use = "complete.obs")
+print(paste("Correlation between Total Steps and Minutes Asleep:", round(correlation_sleep_steps, 3)))
+
+# Visualize the relationship
+ggplot(sleep_activity, aes(x = total_steps, y = total_minutes_asleep)) +
+  geom_point(alpha = 0.5, color = "purple") +
+  geom_smooth(method = "lm", se = FALSE, color = "darkblue") +
+  labs(
+    title = "Relationship Between Daily Steps and Sleep Duration",
+    x = "Total Steps",
+    y = "Total Minutes Asleep"
+  )
+```
+
+### Interpretation
+The scatterplot and correlation value (e.g., -0.4) suggest a moderate negative relationship:
+- More active days tend to be associated with slightly shorter sleep durations.
+- This may reflect evening workouts, lifestyle demands, or trade-offs between activity and recovery.
+- Bellabeat could use this insight to guide users on balancing movement and rest, offering reminders or personalized tips for recovery.
+
+#### So what?:
+Leverage the Time watch's sleep mode to send recovery reminders after high-step days (e.g., 'You walked 12K steps today! Wind down by 10 PM'). Position it as a tool for balanced wellness, not just activity tracking.
+
+---
+# 📊 Analysis Phase 3: Weight Trends Analysis
+
+### Purpose
+To understand how consistently users log their weight and identify behavioral patterns in weight tracking. This helps highlight drop-off points and opportunities to improve user motivation and retention around health goals.
+
+```{r analysis-phase-weight-trends, echo=TRUE, message=FALSE, warning=FALSE}
+# Load required packages
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+# Prepare weight data
+weight_tracking_clean <- weight_tracking_clean %>%
+  mutate(weight_date = as_date(mdy_hms(date))) %>%
+  filter(!is.na(weight_date))
+
+# Total logs per user
+logs_per_user <- weight_tracking_clean %>%
+  group_by(id) %>%
+  summarise(total_logs = n())
+
+ggplot(logs_per_user, aes(x = reorder(id, -total_logs), y = total_logs)) +
+  geom_col(fill = "darkgreen", alpha = 0.8) +
+  labs(
+    title = "Total Number of Weight Logs per User",
+    x = "User ID",
+    y = "Number of Logs"
+  ) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### interpretation
+The weight tracking feature shows minimal adoption and retention among users:
+- **88% of users (22 out of 25)** logged their weight only once, indicating low initial engagement.
+- Only **three users** logged more than once, with individual totals of **12**, **9**, and **3 entries**, pointing to isolated cases of consistent usage.
+- Despite technical availability, the feature sees **limited sustained interaction**, suggesting low perceived value or friction in the user experience.
+
+These findings underscore the need to evaluate and possibly redesign the feature to better align with user goals and motivations. Considerations include introducing prompts, improving feedback mechanisms, and enhancing the perceived benefit of regular tracking.
+
+#### So what?:
+"Gamify weight tracking via the Leaf tracker's app notifications (e.g., 'Log weight 3x this week to earn a mindfulness meditation guide'). Tie consistency to membership rewards, boosting engagement."
+
+#---
+
+# 📊 Analysis Phase 4: User Engagement Analysis
+
+### Purpose
+To examine how often users log their **activity**, **sleep**, and **weight** data to uncover engagement trends and spot opportunities to strengthen habits with Bellabeat’s app features.
+
+```{r analysis-phase-user-engagement-activity, echo=TRUE, message=FALSE, warning=FALSE}
+# 📦 Load required packages
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+
+# Ensure correct date format
+daily_activity_clean <- daily_activity_clean %>% mutate(activity_date = as_date(activity_date))
+
+# Activity logging days
+activity_engagement <- daily_activity_clean %>%
+  group_by(id) %>%
+  summarise(activity_days_logged = n_distinct(activity_date), .groups = "drop")
+
+# 📊 Activity logging plot
+print(
+  ggplot(activity_engagement, aes(x = reorder(id, -activity_days_logged), y = activity_days_logged)) +
+    geom_bar(stat = "identity", fill = "steelblue") +
+    labs(title = "Activity Logging Days per User", x = "User ID", y = "Days Logged") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+)
+```
+
+### interpretation:
+The activity logging data shows that user engagement falls into three clear patterns:
+
+Highly Active (20%) – Log activity almost daily
+
+Occasionally Active (60%) – Track 1-3 times per week
+
+Rarely Active (20%) – Hardly ever log activity
+
+This reveals that most users (80%) don’t track consistently, highlighting a major opportunity to improve engagement.
+
+#### So what?:
+This reveals 80% of users aren't fully engaged—meaning Bellabeat's app and devices aren't yet habit-forming. The key opportunity? Turn casual users into consistent trackers by making logging effortless and rewarding.
+
+```{r analysis-phase-user-engagement-sleep, echo=TRUE, message=FALSE, warning=FALSE}
+# 📊 Sleep logging days
+sleep_engagement <- sleep_per_minute_clean %>%
+  mutate(sleep_date = as_date(mdy_hms(date))) %>%
+  group_by(id) %>%
+  summarise(sleep_days_logged = n_distinct(sleep_date), .groups = "drop")
+
+# 📊 Sleep logging plot
+print(
+  ggplot(sleep_engagement, aes(x = reorder(id, -sleep_days_logged), y = sleep_days_logged)) +
+    geom_bar(stat = "identity", fill = "darkgreen") +
+    labs(title = "Sleep Logging Days per User", x = "User ID", y = "Days Logged") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+)
+```
+
+### Interpretation:
+The data shows:
+Top 25% track sleep daily (power users)
+Middle 50% log weekly (opportunity to improve)
+Bottom 25% rarely track
+
+While sleep tracking shows better adoption than other metrics (like weight logging), there's significant room to improve consistency among moderately and minimally engaged users. The data suggests sleep tracking is established but not yet a habitual behavior for most users.
+
+So what?:
+Even though it's not a habitual behavior, this graph reveals sleep tracking is Bellabeat's strongest engagement driver among measured metrics - worth examining what makes it work better than weight/activity tracking.
+
+```{r analysis-phase-user-engagement-weight, echo=TRUE, message=FALSE, warning=FALSE}
+# 📊 Weight logging days
+weight_engagement <- weight_tracking_clean %>%
+  mutate(weight_date = as_date(mdy_hms(date))) %>%
+  group_by(id) %>%
+  summarise(weight_days_logged = n_distinct(weight_date), .groups = "drop")
+
+# 📊 Weight logging plot
+print(
+  ggplot(weight_engagement, aes(x = reorder(id, -weight_days_logged), y = weight_days_logged)) +
+    geom_bar(stat = "identity", fill = "darkred") +
+    labs(title = "Weight Logging Days per User", x = "User ID", y = "Days Logged") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+)
+```
+
+#### NOTE: Weight trends are previously discussed!
+
+### Interpretation
+**Activity Logging:** Most users log activity infrequently, while a small group is consistent. Bellabeat should focus on less engaged users with nudges, habit tools, or easier tracking options.
+
+**Sleep Logging:** Sleep tracking is more consistent than weight tracking for many users but still varies. Reminders and visual progress feedback can support steady logging habits.
+
+**Weight Logging:** Weight tracking is least consistent, with most users logging only once. Bellabeat could explore ways to encourage more consistent weight tracking, such as reminders, goal-setting tools, or progress visualizations to boost motivation.
+
+
+#--
+
+# 📊 Analysis Phase 5: User Segmentation Analysis
+
+### Purpose
+This phase segments users based on their logging patterns for activity, sleep, and weight. The goal is to identify distinct user groups by engagement level, so Bellabeat can design personalized retention and activation strategies to move more users toward healthy, consistent habits.
+
+```{r analysis-phase-user-segmentation, echo=TRUE, message=FALSE, warning=FALSE}
+# 📦 Load required packages
+library(dplyr)
+library(lubridate)
+library(ggplot2)
+library(tidyr)
+
+# 🧮 Step 1: Create summary metrics per user
+activity_engagement <- daily_activity_clean %>%
+  group_by(id) %>%
+  summarise(ActivityLogged = n_distinct(activity_date), .groups = "drop")
+
+sleep_engagement <- sleep_per_minute_clean %>%
+  mutate(SleepDate = as_date(mdy_hms(date))) %>%
+  group_by(id) %>%
+  summarise(SleepLogged = n_distinct(SleepDate), .groups = "drop")
+
+weight_engagement <- weight_tracking_clean %>%
+  mutate(WeightDate = as_date(mdy_hms(date))) %>%
+  group_by(id) %>%
+  summarise(WeightLogged = n_distinct(WeightDate), .groups = "drop")
+
+# Combine and reshape for stacked percentage plot
+engagement_long <- activity_engagement %>%
+  full_join(sleep_engagement, by = "id") %>%
+  full_join(weight_engagement, by = "id") %>%
+  replace_na(list(ActivityLogged = 0, SleepLogged = 0, WeightLogged = 0)) %>%
+  pivot_longer(cols = c(ActivityLogged, SleepLogged, WeightLogged),
+               names_to = "Metric", values_to = "DaysLogged") %>%
+  mutate(Metric = recode(Metric,
+                         "ActivityLogged" = "Activity",
+                         "SleepLogged" = "Sleep",
+                         "WeightLogged" = "Weight"))
+
+# Calculate percentage per user
+engagement_pct <- engagement_long %>%
+  group_by(Metric) %>%
+  summarise(TotalLogged = sum(DaysLogged)) %>%
+  mutate(Percentage = TotalLogged / sum(TotalLogged) * 100)
+
+# 📊 Pie chart of logging proportions with percentage labels
+print(
+  ggplot(engagement_pct, aes(x = "", y = Percentage, fill = Metric)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar(theta = "y") +
+    geom_text(aes(label = paste0(round(Percentage, 1), "%")),
+              position = position_stack(vjust = 0.5),
+              color = "white",
+              size = 5) +
+    scale_fill_manual(values = c("Activity" = "#3498DB", "Sleep" = "#1ABC9C", "Weight" = "#E74C3C")) +
+    labs(
+      title = "Proportion of Logging Across Metrics",
+      subtitle = "Comparison of Activity, Sleep, and Weight Tracking",
+      fill = "Metric"
+    ) +
+    theme_minimal(base_size = 14) +
+    theme(
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.grid = element_blank(),
+      plot.title = element_text(face = "bold")
+    )
+)
+```
+
+### Interpretation:
+Sleep tracking (48.8%) and activity tracking (47.8%) are nearly equal in engagement, while weight tracking is very low (3.4%). This suggests users are equally consistent in tracking sleep and activity, but rarely log their weight.
+
+#### So what?: 
+Bellabeat’s users maintain strong habits for both sleep and activity tracking, but weight tracking is underused. Encouraging or automating weight logging could help complete the health-tracking picture and improve product stickiness.
+
+
+
+## **Insights & Recommendations for Bellabeat Case Study**
+
+
+### **Key Insights from Analysis**
+
+1. **Activity & Calories Relationship**  
+   - **Moderate Positive Correlation (0.58):** Users who take more steps burn more calories.  
+   - **Opportunity:** Combine step challenges with nutrition/hydration tips to incentivize activity.  
+
+2. **Activity vs. Sleep Duration**  
+   **Weak Negative Correlation (-0.18):** Higher step counts slightly reduce sleep duration, possibly due to evening workouts or time trade-offs.  
+   **Opportunity:** Promote balanced routines (e.g., recovery reminders after active days).  
+
+3. **Low Weight Tracking Engagement**  
+    **88% of users logged weight only once**, indicating minimal adoption.  
+    **Opportunity:** Gamify tracking (e.g., rewards for consistent logging) or automate via synced devices.  
+
+4. **User Engagement Segmentation**  
+  **Sleep tracking dominates (60–75% of logs)**, while weight tracking is the weakest.  
+    **Activity logging tiers:**  
+      20% highly active (daily), 60% occasional (1–3x/week), 20% rarely active.  
+   **Key Gap:** 80% of users are inconsistently engaged with tracking features.  
+
+5. **Feature Adoption Hierarchy**  
+    **Most sticky:** Sleep tracking (habitual).  
+    **Least sticky:** Weight tracking (manual, perceived as high effort).  
+
+
+### **Strategic Recommendations**
+
+1. **Boost Weight Tracking Adoption**  
+    **Automate logging:** Integrate with smart scales (e.g., Bellabeat Leaf) to reduce manual effort.  
+    **Gamification:** Unlock mindfulness guides or discounts after consistent logging (e.g., "Log weight 3x/week to earn a reward").  
+
+2. **Enhance Activity Engagement**  
+    **Bundled incentives:** Link step goals to hydration tips (e.g., "Hit 10K steps to unlock water intake reminders").  
+    **Personalized nudges:** Target occasional users with low-effort challenges (e.g., "You’re 2K steps away from your weekly average!").  
+
+3. **Leverage Sleep Tracking Success**  
+    **Expand sleep insights:** Offer personalized wind-down routines (e.g., "You walked 12K steps today—try a 10 PM bedtime").  
+    **Cross-promote activity:** Use sleep data to suggest optimal workout times (e.g., "Your best sleep follows morning walks").  
+
+4. **Improve Consistency Across Features**  
+    **Habit-building tools:** Send progress summaries (e.g., "You’ve tracked sleep 5 days this week—keep it up!").  
+    **Unified dashboard:** Visually link activity, sleep, and weight trends to show holistic health impact.  
+
+5. **Target User Segments Differently**  
+    **Power users (20%):** Offer advanced analytics or premium features.  
+    **Occasional users (60%):** Focus on low-barrier prompts (e.g., "Log just 1 activity this week to stay on track").  
+    **Rarely active (20%):** Re-engage with onboarding refreshers or community challenges.  
+
+
+#### **Conclusion**  
+Bellabeat’s data reveals **sleep as a strength** and **weight tracking as a critical gap**. By automating manual inputs, gamifying consistency, and tailoring strategies to user segments, Bellabeat can transform sporadic users into habitual trackers—driving long-term engagement and healthier behaviors.  
+
+**Next Steps:**  
+ Pilot automated weight sync with Bellabeat devices.  
+ A/B test incentive programs for activity/sleep consistency.  
+ Develop segmented marketing campaigns based on engagement tiers.  
