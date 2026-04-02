@@ -160,6 +160,6 @@ For a full technical and product overview, see [project-paper.md](./project-pape
 
 ---
 
-*دروستکراوە لە لایەن [کارۆ بەختیار](https://github.com/Karo-Bakhtiyar)، سلێمانی، کوردستان، عێراق*
+*دروستکراوە لە لایەن [کارۆ بەختیار](https://github.com/Karo-Bakhtiyar)، سلێمانی، هەرێمئ کوردستان*
 
 </div>
