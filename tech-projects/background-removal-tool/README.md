@@ -2,7 +2,8 @@
 
 A browser-based background removal tool that runs entirely on your device. No uploads, no servers, no API keys — just open it and use it.
 
-**[Live Demo](https://karo-bakhtiyar.github.io/background-removal-tool)**
+**[Live Demo](https://karo-bakhtiyar.github.io/background-removal-tool)** | **[Repo](https://github.com/Karo-Bakhtiyar/background-removal-tool)**
+
 
 ---
 
@@ -66,7 +67,7 @@ Then open `http://localhost:3000` in your browser. Opening `index.html` directly
 
 ئامرازێکی وێبگەر بۆ لادانی باکگراوندی وێنە کە بە تەواوی لەسەر ئامێرەکەت کار دەکات. بێ ئەوەی وێنەکان ئەپڵۆد بکەیت، بێ سێرڤەر، و بێ کلیلی API؛ تەنها بیکەرەوە و بەکاری بهێنە.
 
-**[تاقیکردنەوەی ڕاستەوخۆ](https://karo-bakhtiyar.github.io/background-removal-tool)**
+**[تاقیکردنەوەی ڕاستەوخۆ](https://karo-bakhtiyar.github.io/background-removal-tool)** | **[کۆدەکە](https://github.com/Karo-Bakhtiyar/background-removal-tool)**
 
 ---
 
